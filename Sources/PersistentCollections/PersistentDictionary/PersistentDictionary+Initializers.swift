@@ -12,7 +12,7 @@
 extension PersistentDictionary {
   @inlinable
   public init() {
-    self.init(_new: _Node(storage: _emptySingleton, count: 0))
+    self.init(_new: ._emptyNode())
   }
 
   @inlinable
