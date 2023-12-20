@@ -576,4 +576,47 @@ final class HeapTests: CollectionTestCase {
       }
     }
   }
+
+  func test_dijsktra() {
+
+  }
+}
+
+struct Unvisited<Node>: Comparable {
+  var node: Node
+  var distance: Int
+
+  func ==(left: Self, right: Self) -> Bool { left.distance == right.distance }
+  func <(left: Self, right: Self) -> Bool { left.distance < right.distance }
+}
+
+
+
+extension Array {
+  func shortestPathSources(
+    from start: Index,
+    connected: (_ source: Element, _ destination: Element) -> Bool
+  ) -> [Index: Index] {
+
+    var shortestPathSources: [Index: Index] = [:]
+    var stepCounts = [start: 0]
+    func stepCount(index: Index) -> Int { stepCounts[index]! }
+    var heap = Heap([Heap.ElementValuePair(start, stepCount)])
+
+    while let source = heap.popMin()?.value {
+      let newStepCount = stepCounts[source]! + 1
+
+      for destination in orthogonalNeighbors(source)
+      where
+      connected(try! self[validating: source], destination.value)
+      && stepCounts[destination.key].map({ newStepCount < $0 }) != false
+      {
+        stepCounts[destination.key] = newStepCount
+        shortestPathSources[destination.key] = source
+        heap.insert(.init(destination.key, stepCount))
+      }
+    }
+
+    return shortestPathSources
+  }
 }

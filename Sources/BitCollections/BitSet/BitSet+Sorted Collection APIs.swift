@@ -46,4 +46,15 @@ extension BitSet: _SortedCollection {
   public func max() -> Element? {
     last
   }
+
+  /// Returns the first index in this set that addresses a member greater than
+  /// or equal to `value`, or `endIndex` if all elements in `self` are less than
+  /// it.
+  public func partitioningIndex(for value: Int) -> Index {
+    // FIXME: This function has a bad name.
+    // It comes from swift-algorithms, but it does not make it good.
+    // https://swiftpackageindex.com/apple/swift-algorithms/1.2.0/documentation/algorithms/swift/collection/partitioningindex(where:)
+    let i = _read { handle in handle.partitioningIndex(for: value) }
+    return Index(_position: i)
+  }
 }

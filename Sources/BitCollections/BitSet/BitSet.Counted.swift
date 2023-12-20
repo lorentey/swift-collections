@@ -52,12 +52,12 @@ extension BitSet.Counted {
   }
 
   @inlinable
-  public init<S: Sequence>(words: S) where S.Element == UInt {
+  public init(words: some Sequence<UInt>) {
     self.init(BitSet(words: words))
   }
 
   @inlinable
-  public init<I: BinaryInteger>(bitPattern x: I) {
+  public init(bitPattern x: some BinaryInteger) {
     self.init(words: x.words)
   }
 
@@ -66,9 +66,7 @@ extension BitSet.Counted {
   }
 
   @inlinable
-  public init<S: Sequence>(
-    _ elements: __owned S
-  ) where S.Element == Int {
+  public init(_ elements: __owned some Sequence<Int>) {
     self.init(BitSet(elements))
   }
 
