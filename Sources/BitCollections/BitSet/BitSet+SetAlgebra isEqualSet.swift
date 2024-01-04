@@ -56,14 +56,14 @@ extension BitSet {
   ///
   /// - Complexity: O(*n*), where *n* is the number of items in `other`.
   public func isEqualSet<S: Sequence>(to other: S) -> Bool where S.Element == Int {
-    if S.self == Self.self {
-      return isEqualSet(to: other as! Self)
+    if let other = _specialize(other, for: Self.self) {
+      return isEqualSet(to: other)
     }
-    if S.self == BitSet.Counted.self {
-      return isEqualSet(to: other as! BitSet.Counted)
+    if let other = _specialize(other, for: BitSet.Counted.self) {
+      return isEqualSet(to: other)
     }
-    if S.self == Range<Int>.self {
-      return isEqualSet(to: other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self) {
+      return isEqualSet(to: other)
     }
 
     if self.isEmpty {

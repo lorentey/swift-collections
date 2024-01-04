@@ -9,6 +9,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if !COLLECTIONS_SINGLE_MODULE
+import _CollectionsUtilities
+#endif
+
 extension BitSet {
   /// Returns a new bit set with the elements that are common to both this set
   /// and the given set.
@@ -82,8 +86,8 @@ extension BitSet {
   ) -> Self
   where S.Element == Int
   {
-    if S.self == Range<Int>.self {
-      return intersection(other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self) {
+      return intersection(other)
     }
     // Note: BitSet & BitSet.Counted are handled in the BitSet initializer below
     return intersection(BitSet(_validMembersOf: other))

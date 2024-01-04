@@ -103,14 +103,14 @@ extension BitSet {
   where S.Element == Int
   {
     guard !isEmpty else { return false }
-    if S.self == BitSet.self {
-      return isStrictSuperset(of: other as! BitSet)
+    if let other = _specialize(other, for: BitSet.self) {
+      return isStrictSuperset(of: other)
     }
-    if S.self == BitSet.Counted.self {
-      return isStrictSuperset(of: other as! BitSet.Counted)
+    if let other = _specialize(other, for: BitSet.Counted.self) {
+      return isStrictSuperset(of: other)
     }
-    if S.self == Range<Int>.self {
-      return isStrictSuperset(of: other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self) {
+      return isStrictSuperset(of: other)
     }
     return _UnsafeHandle.withTemporaryBitSet(
       wordCount: _storage.count

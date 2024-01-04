@@ -9,6 +9,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if !COLLECTIONS_SINGLE_MODULE
+import _CollectionsUtilities
+#endif
+
 extension BitSet {
   /// Adds the elements of the given set to this set.
   ///
@@ -79,16 +83,16 @@ extension BitSet {
   public mutating func formUnion<S: Sequence>(
     _ other: __owned S
   ) where S.Element == Int {
-    if S.self == BitSet.self {
-      formUnion(other as! BitSet)
+    if let other = _specialize(other, for: BitSet.self) {
+      formUnion(other)
       return
     }
-    if S.self == BitSet.Counted.self {
-      formUnion(other as! BitSet.Counted)
+    if let other = _specialize(other, for: BitSet.Counted.self) {
+      formUnion(other)
       return
     }
-    if S.self == Range<Int>.self {
-      formUnion(other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self) {
+      formUnion(other)
       return
     }
     for value in other {

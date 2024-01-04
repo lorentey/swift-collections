@@ -9,6 +9,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if !COLLECTIONS_SINGLE_MODULE
+import _CollectionsUtilities
+#endif
+
 extension BitSet {
   /// Returns a Boolean value that indicates whether this set is a superset of
   /// the given set.
@@ -91,14 +95,14 @@ extension BitSet {
   public func isSuperset<S: Sequence>(of other: S) -> Bool
   where S.Element == Int
   {
-    if S.self == BitSet.self {
-      return self.isSuperset(of: other as! BitSet)
+    if let other = _specialize(other, for: BitSet.self) {
+      return self.isSuperset(of: other)
     }
-    if S.self == BitSet.Counted.self {
-      return self.isSuperset(of: other as! BitSet.Counted)
+    if let other = _specialize(other, for: BitSet.Counted.self) {
+      return self.isSuperset(of: other)
     }
-    if S.self == Range<Int>.self  {
-      return self.isSuperset(of: other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self)  {
+      return self.isSuperset(of: other)
     }
     for i in other {
       guard let i = UInt(exactly: i) else { return false }

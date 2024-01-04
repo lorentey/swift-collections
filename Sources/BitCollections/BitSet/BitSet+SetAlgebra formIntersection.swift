@@ -9,6 +9,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if !COLLECTIONS_SINGLE_MODULE
+import _CollectionsUtilities
+#endif
+
 extension BitSet {
   /// Removes the elements of this set that aren't also in the given one.
   ///
@@ -85,8 +89,12 @@ extension BitSet {
   public mutating func formIntersection<S: Sequence>(
     _ other: __owned S
   ) where S.Element == Int {
-    if S.self == Range<Int>.self {
-      formIntersection(other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self) {
+      formIntersection(other)
+      return
+    }
+    if let other = _specialize(other, for: BitSet.Counted.self) {
+      formIntersection(other)
       return
     }
     // Note: BitSet & BitSet.Counted are handled in the BitSet initializer below

@@ -9,6 +9,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if !COLLECTIONS_SINGLE_MODULE
+import _CollectionsUtilities
+#endif
+
 extension BitSet {
   /// Returns a new set with the elements of both this and the given set.
   ///
@@ -76,14 +80,12 @@ extension BitSet {
   ) -> Self
   where S.Element == Int
   {
-    if S.self == BitSet.self {
-      return union(other as! BitSet)
     }
-    if S.self == BitSet.Counted.self {
-      return union(other as! BitSet.Counted)
+    if let other = _specialize(other, for: BitSet.Counted.self) {
+      return union(other)
     }
-    if S.self == Range<Int>.self {
-      return union(other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self) {
+      return union(other)
     }
     var result = self
     result.formUnion(other)

@@ -84,8 +84,8 @@ extension BitSet {
   ) -> Self
   where S.Element == Int
   {
-    if S.self == Range<Int>.self {
-      return symmetricDifference(other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self) {
+      return symmetricDifference(other)
     }
     // Note: BitSet & BitSet.Counted are handled in the BitSet initializer below
     return symmetricDifference(BitSet(other))

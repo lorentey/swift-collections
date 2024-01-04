@@ -91,12 +91,12 @@ extension BitSet {
   public init<S: Sequence>(
     _ elements: __owned S
   ) where S.Element == Int {
-    if S.self == BitSet.self {
-      self = (elements as! BitSet)
+    if let elements = _specialize(elements, for: BitSet.self) {
+      self = elements
       return
     }
-    if S.self == BitSet.Counted.self {
-      self = (elements as! BitSet.Counted)._bits
+    if let elements = _specialize(elements, for: BitSet.Counted.self) {
+      self = elements._bits
       return
     }
     self.init()
@@ -118,16 +118,16 @@ extension BitSet {
   internal init<S: Sequence>(
     _validMembersOf elements: __owned S
   ) where S.Element == Int {
-    if S.self == BitSet.self {
-      self = (elements as! BitSet)
+    if let elements = _specialize(elements, for: BitSet.self) {
+      self = elements
       return
     }
-    if S.self == BitSet.Counted.self {
-      self = (elements as! BitSet.Counted)._bits
+    if let elements = _specialize(elements, for: BitSet.Counted.self) {
+      self = elements._bits
       return
     }
-    if S.self == Range<Int>.self {
-      let r = (elements as! Range<Int>)
+    if let elements = _specialize(elements, for: Range<Int>.self) {
+      let r = elements
       self.init(_range: r._clampedToUInt())
       return
     }

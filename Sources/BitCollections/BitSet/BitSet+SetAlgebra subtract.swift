@@ -9,6 +9,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if !COLLECTIONS_SINGLE_MODULE
+import _CollectionsUtilities
+#endif
+
 extension BitSet {
   /// Removes the elements of the given bit set from this set.
   ///
@@ -83,16 +87,16 @@ extension BitSet {
   public mutating func subtract<S: Sequence>(
     _ other: S
   ) where S.Element == Int {
-    if S.self == BitSet.self {
-      self.subtract(other as! BitSet)
+    if let other = _specialize(other, for: BitSet.self) {
+      self.subtract(other)
       return
     }
-    if S.self == BitSet.Counted.self {
-      self.subtract(other as! BitSet.Counted)
+    if let other = _specialize(other, for: BitSet.Counted.self) {
+      self.subtract(other)
       return
     }
-    if S.self == Range<Int>.self {
-      self.subtract(other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self) {
+      self.subtract(other)
       return
     }
     var it = other.makeIterator()

@@ -117,14 +117,14 @@ extension BitSet {
   public func isStrictSubset<S: Sequence>(of other: S) -> Bool
   where S.Element == Int
   {
-    if S.self == BitSet.self {
-      return isStrictSubset(of: other as! BitSet)
+    if let other = _specialize(other, for: BitSet.self) {
+      return isStrictSubset(of: other)
     }
-    if S.self == BitSet.Counted.self {
-      return isStrictSubset(of: other as! BitSet.Counted)
+    if let other = _specialize(other, for: BitSet.Counted.self) {
+      return isStrictSubset(of: other)
     }
-    if S.self == Range<Int>.self {
-      return isStrictSubset(of: other as! Range<Int>)
+    if let other = _specialize(other, for: Range<Int>.self) {
+      return isStrictSubset(of: other)
     }
 
     if isEmpty {
