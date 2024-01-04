@@ -9,6 +9,10 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if !COLLECTIONS_SINGLE_MODULE
+import _CollectionsUtilities
+#endif
+
 extension BitSet {
   /// Returns a new bit set with the elements that are either in this set or in
   /// `other`, but not in both.

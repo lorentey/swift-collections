@@ -80,6 +80,8 @@ extension BitSet {
   ) -> Self
   where S.Element == Int
   {
+    if let other = _specialize(other, for: BitSet.self) {
+      return union(other)
     }
     if let other = _specialize(other, for: BitSet.Counted.self) {
       return union(other)
