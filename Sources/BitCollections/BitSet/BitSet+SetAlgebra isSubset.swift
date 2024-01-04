@@ -104,9 +104,7 @@ extension BitSet {
   /// - Complexity: O(*max*) + *k*, where *max* is the largest item in `self`,
   ///    and *k* is the complexity of iterating over all elements in `other`.
   @inlinable
-  public func isSubset<S: Sequence>(of other: S) -> Bool
-  where S.Element == Int
-  {
+  public func isSubset(of other: some Sequence<Int>) -> Bool {
     if let other = _specialize(other, for: BitSet.self) {
       return self.isSubset(of: other)
     }

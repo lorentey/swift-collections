@@ -92,9 +92,7 @@ extension BitSet {
   /// - Complexity: The same as the complexity of iterating over all elements
   ///    in `other`.
   @inlinable
-  public func isSuperset<S: Sequence>(of other: S) -> Bool
-  where S.Element == Int
-  {
+  public func isSuperset(of other: some Sequence<Int>) -> Bool {
     if let other = _specialize(other, for: BitSet.self) {
       return self.isSuperset(of: other)
     }

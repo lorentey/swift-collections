@@ -50,7 +50,7 @@ extension BitSet {
   ///
   /// - Complexity: O(`words.count`)
   @inlinable
-  public init<S: Sequence>(words: S) where S.Element == UInt {
+  public init(words: some Sequence<UInt>) {
     self.init(_words: words.map { _Word($0) })
   }
   
@@ -65,7 +65,7 @@ extension BitSet {
   ///
   /// - Complexity: O(`x.bitWidth`)
   @inlinable
-  public init<I: BinaryInteger>(bitPattern x: I) {
+  public init(bitPattern x: some BinaryInteger) {
     self.init(words: x.words)
   }
 
@@ -88,9 +88,7 @@ extension BitSet {
   ///
   /// - Complexity: O(*n*), where *n* is the number of elements in the sequence.
   @inlinable
-  public init<S: Sequence>(
-    _ elements: __owned S
-  ) where S.Element == Int {
+  public init(_ elements: __owned some Sequence<Int>) {
     if let elements = _specialize(elements, for: BitSet.self) {
       self = elements
       return
@@ -115,9 +113,9 @@ extension BitSet {
   ///
   /// - Complexity: O(*n*), where *n* is the number of elements in the sequence.
   @inlinable
-  internal init<S: Sequence>(
-    _validMembersOf elements: __owned S
-  ) where S.Element == Int {
+  internal init(
+    _validMembersOf elements: __owned some Sequence<Int>
+  ) {
     if let elements = _specialize(elements, for: BitSet.self) {
       self = elements
       return

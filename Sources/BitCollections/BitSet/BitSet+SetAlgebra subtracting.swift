@@ -84,11 +84,7 @@ extension BitSet {
   /// - Complexity: O(*max*) + *k*, where *max* is the largest item in `self`,
   ///    and *k* is the complexity of iterating over all elements in `other`.
   @inlinable
-  public func subtracting<S: Sequence>(
-    _ other: __owned S
-  ) -> Self
-  where S.Element == Int
-  {
+  public func subtracting(_ other: __owned some Sequence<Int>) -> Self {
     var result = self
     result.subtract(other)
     return result

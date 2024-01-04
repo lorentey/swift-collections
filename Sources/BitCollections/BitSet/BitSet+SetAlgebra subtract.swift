@@ -84,9 +84,7 @@ extension BitSet {
   /// - Complexity: O(*max*) + *k*, where *max* is the largest item in `self`,
   ///    and *k* is the complexity of iterating over all elements in `other`.
   @inlinable
-  public mutating func subtract<S: Sequence>(
-    _ other: S
-  ) where S.Element == Int {
+  public mutating func subtract(_ other: some Sequence<Int>) {
     if let other = _specialize(other, for: BitSet.self) {
       self.subtract(other)
       return
