@@ -49,6 +49,23 @@ extension _UnsafeBitSet {
 }
 
 extension _UnsafeBitSet {
+  internal func partitioningIndex(for value: Int) -> Index {
+    partitioningIndex(for: value >= 0 ? UInt(value) : 0)
+  }
+
+  internal func partitioningIndex(for value: UInt) -> Index {
+    var i = _UnsafeBitSet.Index(value)
+    if i >= self.endIndex {
+      i = self.endIndex
+    } else if !self.contains(i.value) {
+      i = self.index(after: i)
+    }
+    assert(i == self.endIndex || self.contains(i.value))
+    return i
+  }
+}
+
+extension _UnsafeBitSet {
   @_effects(releasenone)
   internal mutating func formUnion(_ range: Range<UInt>) {
     ensureMutable()

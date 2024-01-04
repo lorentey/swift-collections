@@ -98,23 +98,11 @@ extension BitSet {
   public subscript(members bounds: Range<Int>) -> Slice<BitSet> {
     let bounds: Range<Index> = _read { handle in
       let bounds = bounds._clampedToUInt()
-      var lower = _UnsafeBitSet.Index(bounds.lowerBound)
-      if lower >= handle.endIndex {
-        lower = handle.endIndex
-      } else if !handle.contains(lower.value) {
-        lower = handle.index(after: lower)
-      }
-      assert(lower == handle.endIndex || handle.contains(lower.value))
-
-      var upper = _UnsafeBitSet.Index(bounds.upperBound)
-      if upper <= lower {
-        upper = lower
-      } else if upper >= handle.endIndex {
-        upper = handle.endIndex
-      } else if !handle.contains(upper.value) {
-        upper = handle.index(after: upper)
-      }
-      assert(upper == handle.endIndex || handle.contains(upper.value))
+      let lower = handle.partitioningIndex(for: bounds.lowerBound)
+      let upper = (
+        bounds.isEmpty
+        ? lower
+        : handle.partitioningIndex(for: bounds.upperBound))
       assert(lower <= upper)
       return Range(
         uncheckedBounds: (Index(_position: lower), Index(_position: upper)))

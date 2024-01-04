@@ -386,6 +386,22 @@ final class BitSetTest: CollectionTestCase {
     }
   }
 
+  func test_partitioningIndex() {
+    let bits: BitSet = [2, 5, 6, 8, 9]
+    let expectations = [2, 2, 2, 5, 5, 5, 6, 8, 8, 9]
+
+    withEvery("value", in: -10 ..< 20) { value in
+      let i = bits.partitioningIndex(for: value)
+      if value < 0 {
+        expectEqual(i, bits.startIndex)
+      } else if value < expectations.count {
+        expectEqual(bits[i], expectations[value])
+      } else {
+        expectEqual(i, bits.endIndex)
+      }
+    }
+  }
+
   func test_member_range_subscript() {
     let bits: BitSet = [2, 5, 6, 8, 9]
 
