@@ -28,11 +28,11 @@ extension BitArray {
   @inline(never)
   @_effects(releasenone)
   public func _checkInvariants() {
-    precondition(_count <= _storage.count * _Word.capacity)
-    precondition(_count > (_storage.count - 1) * _Word.capacity)
+    precondition(_count <= _storage2.count * _Word.capacity)
+    precondition(_count > (_storage2.count - 1) * _Word.capacity)
     let p = _BitPosition(_count).split
     if p.bit > 0 {
-      precondition(_storage.last!.subtracting(_Word(upTo: p.bit)) == .empty)
+      precondition(_storage2.last!.subtracting(_Word(upTo: p.bit)) == .empty)
     }
   }
 #else

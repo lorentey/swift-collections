@@ -40,9 +40,7 @@ internal func _addressString<T: AnyObject>(for object: Unmanaged<T>) -> String {
 }
 
 @inlinable
-internal func _arrayDescription<C: Collection>(
-  for elements: C
-) -> String {
+internal func _arrayDescription(for elements: some Collection) -> String {
   var result = "["
   var first = true
   for item in elements {
@@ -96,9 +94,7 @@ public func _addressString<T: AnyObject>(for object: Unmanaged<T>) -> String {
 }
 
 @inlinable
-public func _arrayDescription<C: Collection>(
-  for elements: C
-) -> String {
+public func _arrayDescription(for elements: some Collection) -> String {
   var result = "["
   var first = true
   for item in elements {

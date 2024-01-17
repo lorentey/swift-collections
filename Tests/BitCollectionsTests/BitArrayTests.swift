@@ -822,53 +822,116 @@ final class BitArrayTests: CollectionTestCase {
     }
   }
 
-  func test_bitwiseOr() {
-    withSome("count", in: 0 ..< 512, maxSamples: 100) { count in
-      withEvery("i", in: 0 ..< 10) { i in
-        let a = randomBoolArray(count: count)
-        let b = randomBoolArray(count: count)
-        
-        let c = BitArray(a)
-        let d = BitArray(b)
-        
-        let expected = zip(a, b).map { $0 || $1 }
-        let actual = c | d
-        
-        expectEqualElements(actual, expected)
+  func test_bitwiseOr_full_full() {
+    withEvery("count", in: 0 ..< 512) { count in
+      var rng = RepeatableRandomNumberGenerator(seed: 0)
+      let a = randomBoolArray(count: count, using: &rng)
+      let b = randomBoolArray(count: count, using: &rng)
+
+      let c = BitArray(a)
+      let d = BitArray(b)
+
+      let expected = zip(a, b).map { $0 || $1 }
+      var actual = c
+      actual.formBitwiseOr(with: d)
+
+      expectEqualElements(actual, expected)
+    }
+  }
+
+  func test_bitwiseOr_full_slice() {
+    let w = UInt.bitWidth
+    withEvery("count1", in: [
+      0, 1, 2, 3, 5, 10, 20,
+      w - 1, w, w + 1,
+      2 * w - 1, 2 * w, 2 * w + 1,
+      3 * w - 1, 3 * w, 3 * w + 1,
+    ]) { count1 in
+      withEvery("count2", in: [
+        count1, count1 + 1, count1 + 10, count1 + 70
+      ]) { count2 in
+        withEvery("start", in: 0 ... count2 - count1) { start in
+          var rng = RepeatableRandomNumberGenerator(seed: 0)
+          let a = randomBoolArray(count: count1, using: &rng)
+          let b = randomBoolArray(count: count2, using: &rng)
+          let c = BitArray(a)
+          let d = BitArray(b)
+
+          let sourceRange = start ..< (start + count1)
+
+          let expected = zip(a, b[sourceRange]).map { $0 || $1 }
+
+          var actual = c
+          actual.formBitwiseOr(with: sourceRange, in: d)
+
+          expectEqualElements(actual, expected)
+        }
       }
     }
   }
 
-  func test_bitwiseAnd() {
+  func test_bitwiseOr_slice_full() {
+    let w = UInt.bitWidth
+    withEvery("wholeCount", in: [
+      0, 1, 2, 3, 5, 10,
+      w - 1, w, w + 1,
+      2 * w - 1, 2 * w, 2 * w + 1,
+      3 * w - 1, 3 * w, 3 * w + 1,
+    ]) { wholeCount in
+      withEvery("sliceStart", in: 0 ... wholeCount) { sliceStart in
+        withEvery("sliceCount", in: 0 ... wholeCount - sliceStart) { sliceCount in
+          var rng = RepeatableRandomNumberGenerator(seed: 0)
+          let a = randomBoolArray(count: wholeCount, using: &rng)
+          let b = randomBoolArray(count: sliceCount, using: &rng)
+          let c = BitArray(a)
+          let d = BitArray(b)
+
+          let targetRange = sliceStart ..< sliceStart + sliceCount
+
+          var expected = a
+          for i in targetRange {
+            expected[i] = expected[i] || b[i - sliceStart]
+          }
+
+          var actual = c
+          actual.formBitwiseOr(targetRange, with: 0..., in: d)
+
+          expectEqualElements(expected, actual)
+        }
+      }
+    }
+  }
+
+  func test_bitwiseAnd_full_full() {
     withSome("count", in: 0 ..< 512, maxSamples: 100) { count in
       withEvery("i", in: 0 ..< 10) { i in
         let a = randomBoolArray(count: count)
         let b = randomBoolArray(count: count)
         
-        let c = BitArray(a)
+        var c = BitArray(a)
         let d = BitArray(b)
         
         let expected = zip(a, b).map { $0 && $1 }
-        let actual = c & d
-        
-        expectEqualElements(actual, expected)
+        c.formBitwiseAnd(with: d)
+
+        expectEqualElements(c, expected)
       }
     }
   }
 
-  func test_bitwiseXor() {
+  func test_bitwiseXor_full_full() {
     withSome("count", in: 0 ..< 512, maxSamples: 100) { count in
       withEvery("i", in: 0 ..< 10) { i in
         let a = randomBoolArray(count: count)
         let b = randomBoolArray(count: count)
         
-        let c = BitArray(a)
+        var c = BitArray(a)
         let d = BitArray(b)
         
         let expected = zip(a, b).map { $0 != $1 }
-        let actual = c ^ d
-        
-        expectEqualElements(actual, expected)
+        c.formBitwiseXor(with: d)
+
+        expectEqualElements(c, expected)
       }
     }
   }
@@ -878,12 +941,12 @@ final class BitArrayTests: CollectionTestCase {
       withEvery("i", in: 0 ..< 10) { i in
         let a = randomBoolArray(count: count)
         
-        let b = BitArray(a)
+        var b = BitArray(a)
 
         let expected = a.map { !$0 }
-        let actual = ~b
-        
-        expectEqualElements(actual, expected)
+        b.toggleAll()
+
+        expectEqualElements(b, expected)
       }
     }
   }

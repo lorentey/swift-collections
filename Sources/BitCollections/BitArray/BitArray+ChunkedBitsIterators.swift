@@ -12,79 +12,126 @@
 #if !COLLECTIONS_SINGLE_MODULE
 import _CollectionsUtilities
 #endif
-
-internal struct _ChunkedBitsForwardIterator {
-  internal typealias _BitPosition = _UnsafeBitSet.Index
-
-  internal let words: UnsafeBufferPointer<_Word>
-  internal let end: _BitPosition
-  internal var position: _BitPosition
-  
-  internal init(
-    words: UnsafeBufferPointer<_Word>,
-    range: Range<Int>
-  ) {
-    assert(range.lowerBound >= 0)
-    assert(range.upperBound <= words.count * _Word.capacity)
-    self.words = words
-    self.end = _BitPosition(range.upperBound)
-    self.position = _BitPosition(range.lowerBound)
-  }
-  
-  mutating func next() -> (bits: _Word, count: UInt)? {
-    guard position < end else { return nil }
-    let (w, b) = position.split
-    if w == end.word {
-      position = end
-      return (
-        bits: words[w]
-          .intersection(_Word(upTo: end.bit))
-          .shiftedDown(by: b),
-        count: end.bit - b)
-    }
-    let c = UInt(_Word.capacity) - b
-    position.value += c
-    return (bits: words[w].shiftedDown(by: b), count: c)
-  }
-}
-
-internal struct _ChunkedBitsBackwardIterator {
+/// Iterator that visits maximally long word chunks within a bit region of a
+/// buffer of words.
+internal struct _ChunkedBitsIterator {
   internal typealias _BitPosition = _UnsafeBitSet.Index
 
   internal let words: UnsafeBufferPointer<_Word>
   internal let start: _BitPosition
+  internal let end: _BitPosition
   internal var position: _BitPosition
-  
+
   internal init(
-    words: UnsafeBufferPointer<_Word>,
-    range: Range<Int>
+    _ words: UnsafeBufferPointer<_Word>,
+    in range: Range<Int>
   ) {
     assert(range.lowerBound >= 0)
     assert(range.upperBound <= words.count * _Word.capacity)
     self.words = words
     self.start = _BitPosition(range.lowerBound)
-    self.position = _BitPosition(range.upperBound)
+    self.end = _BitPosition(range.upperBound)
+    self.position = start
   }
-  
-  internal mutating func next() -> (bits: _Word, count: UInt)? {
+
+  internal init(
+    _ handle: BitArray._UnsafeHandle,
+    in range: Range<Int>
+  ) {
+    self.init(handle._words, in: range)
+  }
+
+  internal mutating func jumpFront() {
+    self.position = start
+  }
+
+  internal mutating func jumpBack() {
+    self.position = end
+  }
+
+  internal mutating func nextBits(count: UInt) -> _Word {
+    assert(count > 0 && count <= _Word.capacity)
+    let (w1, c1) = nextChunk(maxBitCount: count)!
+    let remainder = count - c1
+    guard remainder > 0 else { return w1 }
+    let (w2, c2) = nextChunk(maxBitCount: remainder)!
+    assert(remainder == c2)
+    return w1.union(w2.shiftedUp(by: c1))
+  }
+
+  internal mutating func previousBits(count: UInt) -> _Word {
+    assert(count > 0 && count <= _Word.capacity)
+    let (w1, c1) = previousChunk(maxBitCount: count)!
+    let remainder = count - c1
+    guard remainder > 0 else { return w1 }
+    let (w2, c2) = previousChunk(maxBitCount: remainder)!
+    assert(remainder == c2)
+    return w1.shiftedUp(by: c2).union(w2)
+  }
+
+  internal mutating func nextChunk(
+    maxBitCount: UInt = UInt(_Word.capacity)
+  ) -> (bits: _Word, count: UInt)? {
+    guard let (start, count) = nextChunkPosition(maxBitCount: maxBitCount) else {
+      return nil
+    }
+    let (w, b) = start.split
+    let value = words[w].shiftedDown(by: b).intersection(_Word(upTo: count))
+    return (value, count)
+  }
+
+  internal mutating func previousChunk(
+    maxBitCount: UInt = UInt(_Word.capacity)
+  ) -> (bits: _Word, count: UInt)? {
+    guard let (start, count) = previousChunkPosition(
+      maxBitCount: maxBitCount
+    ) else {
+      return nil
+    }
+    let (w, b) = start.split
+    let value = words[w].shiftedDown(by: b).intersection(_Word(upTo: count))
+    return (value, count)
+  }
+
+  internal mutating func nextChunkPosition(
+    maxBitCount: UInt = UInt(_Word.capacity)
+  ) -> (start: _BitPosition, count: UInt)? {
+    assert(maxBitCount > 0)
+    guard position < end else { return nil }
+    let p = position
+    let limit = min(end, _BitPosition(p.value + maxBitCount))
+    if p.word == limit.word {
+      position = limit
+      return (start: p, count: limit.bit - p.bit)
+    }
+    let c = UInt(_Word.capacity) - p.bit
+    position.value += c
+    return (start: p, count: c)
+  }
+
+  internal mutating func previousChunkPosition(
+    maxBitCount: UInt = UInt(_Word.capacity)
+  ) -> (start: _BitPosition, count: UInt)? {
+    assert(maxBitCount > 0)
     guard position > start else { return nil }
-    let (w, b) = position.endSplit
-    if w == start.word {
-      position = start
-      return (
-        bits: words[w]
-          .intersection(_Word(upTo: b))
-          .shiftedDown(by: start.bit),
-        count: b - start.bit)
+    let p = position
+    let limit = (
+      p.value >= start.value + maxBitCount
+      ? _BitPosition(p.value  - maxBitCount)
+      : start)
+    let (w, b) = p.endSplit
+    if w == limit.word {
+      position = limit
+      return (start: limit, count: b - limit.bit)
     }
     let c = b
     position.value -= c
-    return (bits: words[w].intersection(_Word(upTo: b)), count: c)
+    return (start: position, count: c)
   }
 }
 
 extension IteratorProtocol where Element == Bool {
-  mutating func _nextChunk(
+  internal mutating func _nextChunk(
     maximumCount: UInt = UInt(_Word.capacity)
   ) -> (bits: _Word, count: UInt) {
     assert(maximumCount <= _Word.capacity)

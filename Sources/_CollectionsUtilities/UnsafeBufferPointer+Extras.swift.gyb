@@ -23,6 +23,22 @@ extension UnsafeBufferPointer {
     assert(index >= 0 && index < count)
     return baseAddress.unsafelyUnwrapped + index
   }
+
+  @inlinable
+  ${modifier} func _startsLE(than other: Self) -> Bool {
+    guard let start1 = self.baseAddress else { return true }
+    guard let start2 = other.baseAddress else { return false }
+    return start1 <= start2
+  }
+
+  @inlinable
+  ${modifier} func _startsLE(
+    than other: UnsafeMutableBufferPointer<Element>
+  ) -> Bool {
+    guard let start1 = self.baseAddress else { return true }
+    guard let start2 = UnsafePointer(other.baseAddress) else { return false }
+    return start1 <= start2
+  }
 }
 % end
 ${visibility_boilerplate("end")}

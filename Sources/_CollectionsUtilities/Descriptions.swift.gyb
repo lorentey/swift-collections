@@ -34,9 +34,7 @@ ${modifier} func _addressString<T: AnyObject>(for object: Unmanaged<T>) -> Strin
 }
 
 @inlinable
-${modifier} func _arrayDescription<C: Collection>(
-  for elements: C
-) -> String {
+${modifier} func _arrayDescription(for elements: some Collection) -> String {
   var result = "["
   var first = true
   for item in elements {

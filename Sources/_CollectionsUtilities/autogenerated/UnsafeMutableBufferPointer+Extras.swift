@@ -22,6 +22,33 @@
 // but in regular builds we want them to be public. Unfortunately
 // the current best way to do this is to duplicate all definitions.
 #if COLLECTIONS_SINGLE_MODULE
+
+extension UnsafeMutableBufferPointer {
+  @inlinable
+  @inline(__always)
+  internal func _ptr(at index: Int) -> UnsafeMutablePointer<Element> {
+    assert(index >= 0 && index < count)
+    return baseAddress.unsafelyUnwrapped + index
+  }
+
+  @inlinable
+  internal func _startsLE(than other: UnsafeBufferPointer<Element>) -> Bool {
+    guard let start1 = UnsafePointer(self.baseAddress) else { return true }
+    guard let start2 = other.baseAddress else { return false }
+    return start1 <= start2
+  }
+
+  @inlinable
+  internal func _startsLE(
+    than other: UnsafeMutableBufferPointer<Element>
+  ) -> Bool {
+    guard let start1 = self.baseAddress else { return true }
+    guard let start2 = other.baseAddress else { return false }
+    return start1 <= start2
+  }
+
+}
+
 extension UnsafeMutableBufferPointer {
   @inlinable
   public func initialize(fromContentsOf source: Self) -> Index {
@@ -75,9 +102,7 @@ extension Slice {
 
 extension UnsafeMutableBufferPointer {
   @inlinable @inline(__always)
-  public func initializeAll<C: Collection>(
-    fromContentsOf source: C
-  ) where C.Element == Element {
+  public func initializeAll(fromContentsOf source: some Collection<Element>) {
     let i = self.initialize(fromContentsOf: source)
     assert(i == self.endIndex)
   }
@@ -149,6 +174,33 @@ extension Slice {
   }
 }
 #else // !COLLECTIONS_SINGLE_MODULE
+
+extension UnsafeMutableBufferPointer {
+  @inlinable
+  @inline(__always)
+  public func _ptr(at index: Int) -> UnsafeMutablePointer<Element> {
+    assert(index >= 0 && index < count)
+    return baseAddress.unsafelyUnwrapped + index
+  }
+
+  @inlinable
+  public func _startsLE(than other: UnsafeBufferPointer<Element>) -> Bool {
+    guard let start1 = UnsafePointer(self.baseAddress) else { return true }
+    guard let start2 = other.baseAddress else { return false }
+    return start1 <= start2
+  }
+
+  @inlinable
+  public func _startsLE(
+    than other: UnsafeMutableBufferPointer<Element>
+  ) -> Bool {
+    guard let start1 = self.baseAddress else { return true }
+    guard let start2 = other.baseAddress else { return false }
+    return start1 <= start2
+  }
+
+}
+
 extension UnsafeMutableBufferPointer {
   @inlinable
   public func initialize(fromContentsOf source: Self) -> Index {
@@ -202,9 +254,7 @@ extension Slice {
 
 extension UnsafeMutableBufferPointer {
   @inlinable @inline(__always)
-  public func initializeAll<C: Collection>(
-    fromContentsOf source: C
-  ) where C.Element == Element {
+  public func initializeAll(fromContentsOf source: some Collection<Element>) {
     let i = self.initialize(fromContentsOf: source)
     assert(i == self.endIndex)
   }

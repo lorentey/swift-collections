@@ -29,6 +29,22 @@ extension UnsafeBufferPointer {
     assert(index >= 0 && index < count)
     return baseAddress.unsafelyUnwrapped + index
   }
+
+  @inlinable
+  internal func _startsLE(than other: Self) -> Bool {
+    guard let start1 = self.baseAddress else { return true }
+    guard let start2 = other.baseAddress else { return false }
+    return start1 <= start2
+  }
+
+  @inlinable
+  internal func _startsLE(
+    than other: UnsafeMutableBufferPointer<Element>
+  ) -> Bool {
+    guard let start1 = self.baseAddress else { return true }
+    guard let start2 = UnsafePointer(other.baseAddress) else { return false }
+    return start1 <= start2
+  }
 }
 #else // !COLLECTIONS_SINGLE_MODULE
 extension UnsafeBufferPointer {
@@ -37,6 +53,22 @@ extension UnsafeBufferPointer {
   public func _ptr(at index: Int) -> UnsafePointer<Element> {
     assert(index >= 0 && index < count)
     return baseAddress.unsafelyUnwrapped + index
+  }
+
+  @inlinable
+  public func _startsLE(than other: Self) -> Bool {
+    guard let start1 = self.baseAddress else { return true }
+    guard let start2 = other.baseAddress else { return false }
+    return start1 <= start2
+  }
+
+  @inlinable
+  public func _startsLE(
+    than other: UnsafeMutableBufferPointer<Element>
+  ) -> Bool {
+    guard let start1 = self.baseAddress else { return true }
+    guard let start2 = UnsafePointer(other.baseAddress) else { return false }
+    return start1 <= start2
   }
 }
 #endif // COLLECTIONS_SINGLE_MODULE

@@ -31,7 +31,7 @@ extension BitSet {
     //let actualCount = _storage.reduce(into: 0) { $0 += $1.count }
     //precondition(_count == actualCount, "Invalid count")
 
-    precondition(_storage.isEmpty || !_storage.last!.isEmpty,
+    precondition(_storage2.isEmpty || !_storage2.last!.isEmpty,
                  "Extraneous tail slot")
   }
 #else

@@ -130,18 +130,19 @@ extension BitArray._UnsafeHandle {
     
     if goForward() {
       // Copy forward from a disjoint or following overlapping range.
-      var src = _ChunkedBitsForwardIterator(words: source, range: range)
+      var src = _ChunkedBitsIterator(source, in: range)
       var dst = _BitPosition(target)
-      while let (bits, count) = src.next() {
+      while let (bits, count) = src.nextChunk() {
         _copy(bits: bits, count: count, to: dst)
         dst.value += count
       }
       assert(dst.value == target + range.count)
     } else {
       // Copy backward from a non-following overlapping range.
-      var src = _ChunkedBitsBackwardIterator(words: source, range: range)
+      var src = _ChunkedBitsIterator(source, in: range)
+      src.jumpBack()
       var dst = _BitPosition(target + range.count)
-      while let (bits, count) = src.next() {
+      while let (bits, count) = src.previousChunk() {
         dst.value -= count
         _copy(bits: bits, count: count, to: dst)
       }
