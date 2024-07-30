@@ -241,7 +241,7 @@ let targets: [CustomTarget] = [
   .target(
     kind: .exported,
     name: "DequeModule",
-    dependencies: ["_CollectionsUtilities"],
+    dependencies: ["_CollectionsUtilities", "Future"],
     exclude: ["CMakeLists.txt"]),
   .target(
     kind: .test,
